@@ -1,0 +1,21 @@
+:root {
+  color-scheme: light dark;
+}
+body {
+  font-family: var(--font-stack-main);
+  font-variation-settings: var(--font-axes-main);
+  font-feature-settings: var(--font-features-main);
+  font-weight: var(--font-weight-main);
+  color: var(--text-primary);
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-stack-headings);
+  font-variation-settings: var(--font-axes-headings);
+  font-feature-settings: var(--font-features-headings);
+  font-weight: var(--font-weight-headings);
+}

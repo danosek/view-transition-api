@@ -1,0 +1,88 @@
+:root {
+  --vt-duration: 360ms;
+  --vt-ease: cubic-bezier(0.2, 0.7, 0, 1);
+}
+/* -------------------- ZÁKLAD -------------------- */
+body {
+  background-color: var(--surface-base);
+  display: flex;
+  flex-direction: column;
+  padding: var(--base-4, 24px);
+  gap: var(--base-3, 16px);
+}
+.controls {
+  display: flex;
+  gap: 8px;
+}
+.controls button {
+  border: 1px solid var(--border-shiny);
+  background: var(--surface-main);
+  padding: 6px 10px;
+  border-radius: var(--radius-strong);
+  cursor: pointer;
+}
+bc-wrapper {
+  display: block;
+  border: 1px solid var(--border-shiny);
+  border-radius: var(--radius-strong);
+  box-shadow: var(--elevation-subtle);
+  padding: var(--base-2, 12px);
+  background-color: var(--surface-main);
+  inline-size: fit-content;
+  overflow: clip;
+}
+bc-component {
+  --breadcrumbs-gap: var(--base-1h, 8px);
+  display: flex;
+  gap: var(--breadcrumbs-gap);
+}
+bc-item {
+  --bc-item-color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--breadcrumbs-gap);
+  color: var(--bc-item-color);
+}
+bc-item:last-of-type {
+  --bc-item-color: var(--text-primary);
+}
+bc-item > button.remove {
+  border: 1px solid var(--border-shiny);
+  background: transparent;
+  padding: 2px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+/* -------------------- PŘIDÁVÁNÍ -------------------- */
+/* Nový prvek vyjede zpoza předposledního */
+:root::view-transition-old(addCover) {
+  z-index: 2;
+}
+:root::view-transition-new(addItem) {
+  z-index: 1;
+}
+@keyframes vt-add-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+    transform: translateX(-10px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+    opacity: 1;
+  }
+}
+:root::view-transition-new(addItem) {
+  animation: vt-add-reveal var(--vt-duration) var(--vt-ease) both;
+}
+:root::view-transition-old(addCover) {
+  animation: none;
+}
+/* -------------------- REDUCED MOTION -------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root::view-transition-new(addItem),
+  :root::view-transition-old(addCover) {
+    animation: none;
+  }
+}
