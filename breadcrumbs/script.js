@@ -2,8 +2,37 @@
     const bc = document.getElementById('bc');
     const addBtn = document.getElementById('add');
 
-    let counter = bc.querySelectorAll('bc-item').length;
-    const names = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+    // 50 měst – můžeš libovolně upravit
+    const CITIES = shuffle([
+        'Praha','Brno','Ostrava','Plzeň','Liberec','Olomouc','Ústí nad Labem','Hradec Králové','Pardubice','Zlín',
+        'České Budějovice','Jihlava','Karlovy Vary','Teplice','Děčín','Chomutov','Jablonec nad Nisou','Mladá Boleslav','Prostějov','Třebíč',
+        'Tábor','Opava','Znojmo','Havířov','Kladno','Karviná','Most','Trutnov','Bruntál','Kroměříž',
+        'Vsetín','Uherské Hradiště','Kolín','Písek','Cheb','Břeclav','Litoměřice','Nový Jičín','Kutná Hora','Blansko',
+        'Šternberk','Jindřichův Hradec','Žďár nad Sázavou','Brandýs nad Labem','Hodonín','Česká Lípa','Třinec','Šumperk','Svitavy','Krnov'
+    ]);
+
+    // Fisher–Yates shuffle
+    function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // Přepiš existující drobky náhodnými městy při načtení
+    function seedInitialCities() {
+        const items = bc.querySelectorAll('bc-item');
+        items.forEach((item, i) => {
+            let title = item.querySelector('bc-title');
+            if (!title) {
+                title = document.createElement('bc-title');
+                item.prepend(title);
+            }
+            title.textContent = CITIES[i % CITIES.length];
+        });
+    }
 
     function normalize() {
         const items = [...bc.querySelectorAll('bc-item')];
@@ -29,7 +58,7 @@
                     btn = document.createElement('button');
                     btn.className = 'remove';
                     btn.setAttribute('aria-label', 'Odstranit');
-                    btn.textContent = 'x';
+                    btn.textContent = '✕';
                     item.appendChild(btn);
                 }
             } else if (btn) {
@@ -46,6 +75,13 @@
         return item;
     }
 
+    // Inicializace měst v existujících drobcích
+    seedInitialCities();
+
+    // Po seedování nastav počitadla
+    let counter = bc.querySelectorAll('bc-item').length;
+    let cityIndex = counter % CITIES.length;
+
     // ───────── PŘIDÁNÍ: nový vyjede zpoza předposledního ─────────
     addBtn.addEventListener('click', () => {
         const mutateForAdd = () => {
@@ -53,8 +89,10 @@
             const oldLast = items[items.length - 1] || null;
             if (oldLast) oldLast.style.viewTransitionName = 'addCover';
 
+            const name = CITIES[cityIndex % CITIES.length];
+            cityIndex += 1;
             counter += 1;
-            const name = names[counter - 1] || `Item ${counter}`;
+
             const newItem = createItem(name);
             newItem.style.viewTransitionName = 'addItem';
             bc.appendChild(newItem);
@@ -71,6 +109,7 @@
         let refs;
         const vt = document.startViewTransition(() => {
             refs = mutateForAdd();
+            // sync layout pro správný snapshot
             bc.getBoundingClientRect();
         });
 
@@ -80,7 +119,7 @@
         });
     });
 
-    // ───────── MAZÁNÍ: prostý crossfade ─────────
+    // ───────── MAZÁNÍ: prostý crossfade (můžeš si nechat svoje VT řešení) ─────────
     bc.addEventListener('click', (e) => {
         const btn = e.target.closest('button.remove');
         if (!btn) return;
@@ -97,9 +136,21 @@
         const vt = document.startViewTransition(() => {
             item.remove();
             normalize();
+            // sync layout
+            bc.getBoundingClientRect();
+        });
+
+        vt.finished.finally(() => {
+            // nic
         });
     });
 
-    // Init
+    // CSS pojistka, aby se u posledního nikdy neukázal divider i při race conditions
+    // (volitelné, ale praktické)
+    const styleGuard = document.createElement('style');
+    styleGuard.textContent = `bc-item:last-of-type > bc-divider{display:none!important}`;
+    document.head.appendChild(styleGuard);
+
+    // Init normalize (pro jistotu po seedování)
     normalize();
 })();

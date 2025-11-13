@@ -1,6 +1,6 @@
 :root {
-  --vt-duration: 360ms;
-  --vt-ease: cubic-bezier(0.2, 0.7, 0, 1);
+  --vt-duration: 250ms;
+  --vt-ease: ease-out;
 }
 /* -------------------- ZÁKLAD -------------------- */
 body {
@@ -10,24 +10,23 @@ body {
   padding: var(--base-4, 24px);
   gap: var(--base-3, 16px);
 }
-.controls {
-  display: flex;
-  gap: 8px;
-}
-.controls button {
+button {
   border: 1px solid var(--border-shiny);
-  background: var(--surface-main);
-  padding: 6px 10px;
-  border-radius: var(--radius-strong);
+  background: var(--surface-control);
+  padding: var(--base) var(--base-1h);
+  border-radius: var(--radius-circle);
   cursor: pointer;
+  font-family: var(--font-stack-main);
+  font-variation-settings: var(--font-axes-main);
+  font-feature-settings: var(--font-features-main);
+  font-weight: var(--font-weight-main);
+  font-size: var(--font-size-base);
+}
+button:hover {
+  background: var(--surface-control-hover);
 }
 bc-wrapper {
   display: block;
-  border: 1px solid var(--border-shiny);
-  border-radius: var(--radius-strong);
-  box-shadow: var(--elevation-subtle);
-  padding: var(--base-2, 12px);
-  background-color: var(--surface-main);
   inline-size: fit-content;
   overflow: clip;
 }
@@ -42,16 +41,27 @@ bc-item {
   align-items: center;
   gap: var(--breadcrumbs-gap);
   color: var(--bc-item-color);
+  transition: color 200ms var(--vt-ease);
 }
 bc-item:last-of-type {
   --bc-item-color: var(--text-primary);
 }
-bc-item > button.remove {
-  border: 1px solid var(--border-shiny);
+bc-item > button {
+  border: 1px solid var(--border);
   background: transparent;
-  padding: 2px 6px;
-  border-radius: 8px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-circle);
   cursor: pointer;
+  font-size: 10px;
+  font-weight: bold;
+}
+bc-divider {
+  color: var(--border);
 }
 /* -------------------- PŘIDÁVÁNÍ -------------------- */
 /* Nový prvek vyjede zpoza předposledního */
