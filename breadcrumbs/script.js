@@ -4,11 +4,11 @@
 
     // 50 měst – můžeš libovolně upravit
     const CITIES = shuffle([
-        'Praha','Brno','Ostrava','Plzeň','Liberec','Olomouc','Ústí nad Labem','Hradec Králové','Pardubice','Zlín',
-        'České Budějovice','Jihlava','Karlovy Vary','Teplice','Děčín','Chomutov','Jablonec nad Nisou','Mladá Boleslav','Prostějov','Třebíč',
-        'Tábor','Opava','Znojmo','Havířov','Kladno','Karviná','Most','Trutnov','Bruntál','Kroměříž',
-        'Vsetín','Uherské Hradiště','Kolín','Písek','Cheb','Břeclav','Litoměřice','Nový Jičín','Kutná Hora','Blansko',
-        'Šternberk','Jindřichův Hradec','Žďár nad Sázavou','Brandýs nad Labem','Hodonín','Česká Lípa','Třinec','Šumperk','Svitavy','Krnov'
+        'Praha', 'Brno', 'Ostrava', 'Plzeň', 'Liberec', 'Olomouc', 'Ústí nad Labem', 'Hradec Králové', 'Pardubice', 'Zlín',
+        'České Budějovice', 'Jihlava', 'Karlovy Vary', 'Teplice', 'Děčín', 'Chomutov', 'Jablonec nad Nisou', 'Mladá Boleslav', 'Prostějov', 'Třebíč',
+        'Tábor', 'Opava', 'Znojmo', 'Havířov', 'Kladno', 'Karviná', 'Most', 'Trutnov', 'Bruntál', 'Kroměříž',
+        'Vsetín', 'Uherské Hradiště', 'Kolín', 'Písek', 'Cheb', 'Břeclav', 'Litoměřice', 'Nový Jičín', 'Kutná Hora', 'Blansko',
+        'Šternberk', 'Jindřichův Hradec', 'Žďár nad Sázavou', 'Brandýs nad Labem', 'Hodonín', 'Česká Lípa', 'Třinec', 'Šumperk', 'Svitavy', 'Krnov'
     ]);
 
     // Fisher–Yates shuffle
@@ -120,28 +120,53 @@
     });
 
     // ───────── MAZÁNÍ: prostý crossfade (můžeš si nechat svoje VT řešení) ─────────
+    // ───────── MAZÁNÍ: poslední zajede pod předposlední ─────────
     bc.addEventListener('click', (e) => {
         const btn = e.target.closest('button.remove');
         if (!btn) return;
 
-        const item = btn.closest('bc-item');
-        if (!item) return;
+        const items = bc.querySelectorAll('bc-item');
+        const oldLast = items[items.length - 1];
+        const oldPenult = items.length >= 2 ? items[items.length - 2] : null;
 
-        if (!document.startViewTransition) {
-            item.remove();
+        if (!oldLast || !oldLast.contains(btn)) return;
+
+        // fallback bez VT nebo chybí předposlední
+        if (!document.startViewTransition || !oldPenult) {
+            oldLast.remove();
             normalize();
             return;
         }
 
+        // 🔑 Odjíždějící prvek je viditelný jen jako OLD(removeItem)
+        oldLast.style.viewTransitionName = 'removeItem';
+
+        let newCover = null;
+
         const vt = document.startViewTransition(() => {
-            item.remove();
+            // 1) Odeber poslední
+            oldLast.remove();
+
+            // 2) Přepočítej divider / křížek
             normalize();
+
+            // 3) Nový poslední je kryt → existuje jen v NEW snapshotu
+            const itemsAfter = bc.querySelectorAll('bc-item');
+            newCover = itemsAfter[itemsAfter.length - 1] || null;
+            if (newCover) {
+                newCover.style.viewTransitionName = 'removeCover';
+            }
+
             // sync layout
             bc.getBoundingClientRect();
         });
 
         vt.finished.finally(() => {
-            // nic
+            // úklid
+            oldLast.style.viewTransitionName = '';
+            if (newCover) {
+                newCover.style.viewTransitionName = '';
+            }
         });
     });
 

@@ -1,119 +1,166 @@
 @import (reference) url(../global/styles/spectro-mixins.less);
 
 :root {
-  --vt-duration: 250ms;
-  --vt-ease: ease-out;
+    --vt-duration: 250ms;
+    --vt-ease: ease-out;
 }
 
 /* -------------------- ZÁKLAD -------------------- */
 
 body {
-  background-color: var(--surface-base);
-  display: flex;
-  flex-direction: column;
-  padding: var(--base-4, 24px);
-  gap: var(--base-3, 16px);
+    background-color: var(--surface-base);
+    display: flex;
+    flex-direction: column;
+    padding: var(--base-4, 24px);
+    gap: var(--base-3, 16px);
 }
 
 button {
-  border: 1px solid var(--border-shiny);
-  background: var(--surface-control);
-  padding: var(--base) var(--base-1h);
-  border-radius: var(--radius-circle);
-  cursor: pointer;
-  .font-button();
+    border: 1px solid var(--border-shiny);
+    background: var(--surface-control);
+    padding: var(--base) var(--base-1h);
+    border-radius: var(--radius-circle);
+    cursor: pointer;
+    .font-button();
 
-  &:hover {
-    background: var(--surface-control-hover);
-  }
+    &:hover {
+        background: var(--surface-control-hover);
+    }
+    &:active {
+        background: var(--surface-control-active);
+    }
 }
 
 bc-wrapper {
-  display: block;
-//   padding: var(--base-2, 12px);
-  inline-size: fit-content;
-  overflow: clip;
-//   border: 1px solid var(--border-shiny);
-//   border-radius: var(--radius-strong);
-//   box-shadow: var(--elevation-subtle);
-//   background-color: var(--surface-main);
+    display: block;
+    inline-size: fit-content;
+    overflow: clip;
 }
 
 bc-component {
-  --breadcrumbs-gap: var(--base-1h, 8px);
-  display: flex;
-  gap: var(--breadcrumbs-gap);
+    --breadcrumbs-gap: var(--base-1h, 8px);
+    display: flex;
+    gap: var(--breadcrumbs-gap);
 }
 
 bc-item {
-  --bc-item-color: var(--text-secondary);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--breadcrumbs-gap);
-  color: var(--bc-item-color);
-  transition: color 200ms var(--vt-ease);
-
-  &:last-of-type {
-    --bc-item-color: var(--text-primary);
-  }
-
-  > button {
-    border: 1px solid var(--border);
-    background: transparent;
-    width: 16px;
-    height: 16px;
-    padding: 0;
-    display: flex;
+    --bc-item-color: var(--text-secondary);
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-circle);
-    cursor: pointer;
-    font-size: 10px;
-    font-weight: bold;
-  }
+    gap: var(--breadcrumbs-gap);
+    color: var(--bc-item-color);
+    transition: 200ms color var(--vt-ease);
+    transform-origin: left;
+
+    &:last-of-type {
+        --bc-item-color: var(--text-primary);
+    }
+
+    >button {
+        border: 1px solid var(--border);
+        background: transparent;
+        width: 16px;
+        height: 16px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-circle);
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: bold;
+    }
 }
 
 bc-divider {
     color: var(--border);
 }
 
+/* pojistka: poslední drobek nikdy neukazuje lomítko */
+bc-item:last-of-type>bc-divider {
+    display: none !important;
+}
+
 /* -------------------- PŘIDÁVÁNÍ -------------------- */
-/* Nový prvek vyjede zpoza předposledního */
 
 :root::view-transition-old(addCover) {
-  z-index: 2;
+    z-index: 2;
+    animation: none;
 }
 
 :root::view-transition-new(addItem) {
-  z-index: 1;
+    z-index: 1;
+    animation: vt-add-reveal var(--vt-duration) var(--vt-ease) both;
+    transform-origin: left;
 }
 
 @keyframes vt-add-reveal {
-  from {
-    clip-path: inset(0 100% 0 0);
-    transform: translateX(-10px) scale(0.98);
-    opacity: 0;
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-    transform: none;
-    opacity: 1;
-  }
+    0% {
+        transform: none;
+        opacity: 0;
+    }
+
+    40% {
+        transform: scaleX(0.94);
+    }
+
+    100% {
+        transform: none;
+        opacity: 1;
+    }
 }
 
-:root::view-transition-new(addItem) {
-  animation: vt-add-reveal var(--vt-duration) var(--vt-ease) both;
+/* -------------------- MAZÁNÍ -------------------- */
+/* poslední drobek se „zavíjí“ pod nový poslední */
+
+:root::view-transition-old(removeItem) {
+    z-index: 1;
+    animation: vt-remove var(--vt-duration) var(--vt-ease) both;
+    transform-origin: left;
 }
 
-:root::view-transition-old(addCover) {
-  animation: none;
+/* nový poslední (cover) – jemné doplnění ✕ místo lomítka */
+:root::view-transition-new(removeCover) {
+    z-index: 2;
+    animation: vt-remove-cover var(--vt-duration) var(--vt-ease) both;
+    transform-origin: left;
+}
+
+@keyframes vt-remove {
+    from {
+        transform: none;
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(8px) rotateX(.2turn);
+        opacity: 0;
+    }
+}
+
+/* cover – lehký „doskok“ */
+@keyframes vt-remove-cover {
+    0% {
+        transform: none;
+    }
+
+    40% {
+        transform: scaleX(.96);
+    }
+
+    100% {
+        transform: none;
+    }
 }
 
 /* -------------------- REDUCED MOTION -------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  :root::view-transition-new(addItem),
-  :root::view-transition-old(addCover) {
-    animation: none;
-  }
+
+    :root::view-transition-new(addItem),
+    :root::view-transition-old(addCover),
+    :root::view-transition-old(removeItem),
+    :root::view-transition-new(removeCover) {
+        animation: none;
+    }
 }

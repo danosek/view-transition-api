@@ -25,6 +25,9 @@ button {
 button:hover {
   background: var(--surface-control-hover);
 }
+button:active {
+  background: var(--surface-control-active);
+}
 bc-wrapper {
   display: block;
   inline-size: fit-content;
@@ -41,7 +44,8 @@ bc-item {
   align-items: center;
   gap: var(--breadcrumbs-gap);
   color: var(--bc-item-color);
-  transition: color 200ms var(--vt-ease);
+  transition: 200ms color var(--vt-ease);
+  transform-origin: left;
 }
 bc-item:last-of-type {
   --bc-item-color: var(--text-primary);
@@ -63,36 +67,74 @@ bc-item > button {
 bc-divider {
   color: var(--border);
 }
+/* pojistka: poslední drobek nikdy neukazuje lomítko */
+bc-item:last-of-type > bc-divider {
+  display: none !important;
+}
 /* -------------------- PŘIDÁVÁNÍ -------------------- */
-/* Nový prvek vyjede zpoza předposledního */
 :root::view-transition-old(addCover) {
   z-index: 2;
+  animation: none;
 }
 :root::view-transition-new(addItem) {
   z-index: 1;
+  animation: vt-add-reveal var(--vt-duration) var(--vt-ease) both;
+  transform-origin: left;
 }
 @keyframes vt-add-reveal {
-  from {
-    clip-path: inset(0 100% 0 0);
-    transform: translateX(-10px) scale(0.98);
+  0% {
+    transform: none;
     opacity: 0;
   }
-  to {
-    clip-path: inset(0 0 0 0);
+  40% {
+    transform: scaleX(0.94);
+  }
+  100% {
     transform: none;
     opacity: 1;
   }
 }
-:root::view-transition-new(addItem) {
-  animation: vt-add-reveal var(--vt-duration) var(--vt-ease) both;
+/* -------------------- MAZÁNÍ -------------------- */
+/* poslední drobek se „zavíjí“ pod nový poslední */
+:root::view-transition-old(removeItem) {
+  z-index: 1;
+  animation: vt-remove var(--vt-duration) var(--vt-ease) both;
+  transform-origin: left;
 }
-:root::view-transition-old(addCover) {
-  animation: none;
+/* nový poslední (cover) – jemné doplnění ✕ místo lomítka */
+:root::view-transition-new(removeCover) {
+  z-index: 2;
+  animation: vt-remove-cover var(--vt-duration) var(--vt-ease) both;
+  transform-origin: left;
+}
+@keyframes vt-remove {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateX(8px) rotateX(0.2turn);
+    opacity: 0;
+  }
+}
+/* cover – lehký „doskok“ */
+@keyframes vt-remove-cover {
+  0% {
+    transform: none;
+  }
+  40% {
+    transform: scaleX(0.96);
+  }
+  100% {
+    transform: none;
+  }
 }
 /* -------------------- REDUCED MOTION -------------------- */
 @media (prefers-reduced-motion: reduce) {
   :root::view-transition-new(addItem),
-  :root::view-transition-old(addCover) {
+  :root::view-transition-old(addCover),
+  :root::view-transition-old(removeItem),
+  :root::view-transition-new(removeCover) {
     animation: none;
   }
 }
