@@ -2,14 +2,24 @@
 
 :root {
     color-scheme: light dark;
+    box-sizing: border-box;
+}
+
+*, *::before, *::after {
+    box-sizing: inherit;
 }
 
 body {
     .font-family-main();
     .font-body();
     color: var(--text-primary);
+    margin: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
     .font-family-headings()
+}
+
+h1 {
+  .font-h1()
 }

@@ -67,10 +67,6 @@ bc-item > button {
 bc-divider {
   color: var(--border);
 }
-/* pojistka: poslední drobek nikdy neukazuje lomítko */
-bc-item:last-of-type > bc-divider {
-  display: none !important;
-}
 /* -------------------- PŘIDÁVÁNÍ -------------------- */
 :root::view-transition-old(addCover) {
   z-index: 2;
@@ -98,7 +94,7 @@ bc-item:last-of-type > bc-divider {
 /* poslední drobek se „zavíjí“ pod nový poslední */
 :root::view-transition-old(removeItem) {
   z-index: 1;
-  animation: vt-remove var(--vt-duration) var(--vt-ease) both;
+  animation: vt-remove 0s var(--vt-ease) both;
   transform-origin: left;
 }
 /* nový poslední (cover) – jemné doplnění ✕ místo lomítka */
@@ -113,7 +109,6 @@ bc-item:last-of-type > bc-divider {
     opacity: 1;
   }
   to {
-    transform: translateX(8px) rotateX(0.2turn);
     opacity: 0;
   }
 }

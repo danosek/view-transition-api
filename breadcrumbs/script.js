@@ -119,7 +119,6 @@
         });
     });
 
-    // ───────── MAZÁNÍ: prostý crossfade (můžeš si nechat svoje VT řešení) ─────────
     // ───────── MAZÁNÍ: poslední zajede pod předposlední ─────────
     bc.addEventListener('click', (e) => {
         const btn = e.target.closest('button.remove');

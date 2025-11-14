@@ -1,0 +1,27 @@
+@import (reference) url(./global/styles/spectro-mixins.less);
+
+body {
+    background-color: var(--surface-base);
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    padding: var(--base-4, 24px);
+    gap: var(--base-3, 16px);
+}
+
+ol {
+    list-style-position: inside;
+    padding-inline-start: 0;
+
+    li {
+        .font-h3();
+
+        a {
+            color: currentColor;
+
+            &:not(:hover) {
+                text-decoration: none;
+            }
+        }
+    }
+}

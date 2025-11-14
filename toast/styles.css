@@ -1,0 +1,121 @@
+:root {
+  --toast-ease: cubic-bezier(0.2, 0.7, 0, 1);
+}
+/* -------------------- LAYOUT -------------------- */
+body {
+  background-color: var(--surface-base);
+  display: flex;
+  flex-direction: column;
+  padding: var(--base-4, 24px);
+  gap: var(--base-3, 16px);
+  align-items: center;
+}
+main button {
+  display: block;
+  margin-inline: auto;
+}
+button {
+  flex: 0 0 auto;
+  border: 1px solid var(--border-shiny);
+  background: var(--surface-control);
+  padding: var(--base) var(--base-1h);
+  border-radius: var(--radius-circle);
+  cursor: pointer;
+  font-family: var(--font-stack-main);
+  font-variation-settings: var(--font-axes-main);
+  font-feature-settings: var(--font-features-main);
+  font-weight: var(--font-weight-main);
+  font-size: var(--font-size-base);
+}
+button:hover {
+  background: var(--surface-control-hover);
+}
+button:active {
+  background: var(--surface-control-active);
+}
+toasts-container {
+  position: fixed;
+  left: var(--base-6);
+  bottom: var(--base-6);
+  pointer-events: none;
+  z-index: 999;
+}
+/* toasty se stackují přes bottom+translate, ne přes flex layout */
+toast-component {
+  display: flex;
+  gap: var(--base);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  inline-size: max-content;
+  min-inline-size: 200px;
+  max-inline-size: 450px;
+  padding: var(--base-2);
+  border-radius: var(--radius-strong);
+  background: var(--surface-base-translucent);
+  box-shadow: var(--elevation-strong);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  backdrop-filter: blur(25px);
+  transform-origin: left;
+  transform: translate(0, 0);
+  opacity: 1;
+  pointer-events: auto;
+  --toast-offset-y: 0px;
+  --toast-offset-x: 0px;
+  transform: translate(var(--toast-offset-x), calc(-1 * var(--toast-offset-y)));
+  transition: transform 350ms cubic-bezier(0.2, 0.7, 0, 1), opacity 350ms cubic-bezier(0.2, 0.7, 0, 1);
+}
+toast-texts {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--base-h);
+  font-family: var(--font-stack-main);
+  font-variation-settings: var(--font-axes-main);
+  font-feature-settings: var(--font-features-main);
+  font-weight: var(--font-weight-main);
+  font-size: var(--font-size-s);
+}
+toast-text {
+  color: var(--text-secondary);
+}
+toast-title {
+  font-weight: var(--font-weight-main-bold);
+}
+toast-component > button {
+  border: none;
+  background: transparent;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+toast-component > button:hover {
+  background: var(--surface-control-hover);
+  color: var(--text-primary);
+}
+/* nový toast začíná vlevo a mimo */
+toast-component.is-new {
+  transform: translate(-30px, 20px);
+  opacity: 0;
+}
+/* odcházející toast jede doleva + dolů */
+toast-component.is-exiting {
+  transform: translate(-40px, 20px);
+  opacity: 0;
+}
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  toast-component {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

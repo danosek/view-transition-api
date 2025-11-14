@@ -1,0 +1,25 @@
+body {
+  background-color: var(--surface-base);
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  padding: var(--base-4, 24px);
+  gap: var(--base-3, 16px);
+}
+ol {
+  list-style-position: inside;
+  padding-inline-start: 0;
+}
+ol li {
+  font-family: var(--font-stack-headings);
+  font-variation-settings: var(--font-axes-headings);
+  font-feature-settings: var(--font-features-headings);
+  font-weight: var(--font-weight-headings);
+  font-size: var(--font-size-xxl);
+}
+ol li a {
+  color: currentColor;
+}
+ol li a:not(:hover) {
+  text-decoration: none;
+}

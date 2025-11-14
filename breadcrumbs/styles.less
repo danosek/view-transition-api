@@ -76,11 +76,6 @@ bc-divider {
     color: var(--border);
 }
 
-/* pojistka: poslední drobek nikdy neukazuje lomítko */
-bc-item:last-of-type>bc-divider {
-    display: none !important;
-}
-
 /* -------------------- PŘIDÁVÁNÍ -------------------- */
 
 :root::view-transition-old(addCover) {
@@ -115,7 +110,7 @@ bc-item:last-of-type>bc-divider {
 
 :root::view-transition-old(removeItem) {
     z-index: 1;
-    animation: vt-remove var(--vt-duration) var(--vt-ease) both;
+    animation: vt-remove 0s var(--vt-ease) both;
     transform-origin: left;
 }
 
@@ -133,7 +128,7 @@ bc-item:last-of-type>bc-divider {
     }
 
     to {
-        transform: translateX(8px) rotateX(.2turn);
+        
         opacity: 0;
     }
 }

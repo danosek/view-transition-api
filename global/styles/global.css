@@ -1,5 +1,11 @@
 :root {
   color-scheme: light dark;
+  box-sizing: border-box;
+}
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
 }
 body {
   font-family: var(--font-stack-main);
@@ -8,6 +14,7 @@ body {
   font-weight: var(--font-weight-main);
   font-size: var(--font-size-base);
   color: var(--text-primary);
+  margin: 0;
 }
 h1,
 h2,
@@ -19,4 +26,11 @@ h6 {
   font-variation-settings: var(--font-axes-headings);
   font-feature-settings: var(--font-features-headings);
   font-weight: var(--font-weight-headings);
+}
+h1 {
+  font-family: var(--font-stack-headings);
+  font-variation-settings: var(--font-axes-headings);
+  font-feature-settings: var(--font-features-headings);
+  font-weight: var(--font-weight-headings);
+  font-size: var(--font-size-xxxxl);
 }
