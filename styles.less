@@ -15,6 +15,7 @@ ol {
 
     li {
         .font-h3();
+        font-weight: 400;
 
         a {
             color: currentColor;
@@ -22,6 +23,13 @@ ol {
             &:not(:hover) {
                 text-decoration: none;
             }
+        }
+
+        span {
+            .font-h6();
+            margin-inline-start: 1ch;
+            color: var(--text-secondary);
+            
         }
     }
 }

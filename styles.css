@@ -16,10 +16,20 @@ ol li {
   font-feature-settings: var(--font-features-headings);
   font-weight: var(--font-weight-headings);
   font-size: var(--font-size-xxl);
+  font-weight: 400;
 }
 ol li a {
   color: currentColor;
 }
 ol li a:not(:hover) {
   text-decoration: none;
+}
+ol li span {
+  font-family: var(--font-stack-headings);
+  font-variation-settings: var(--font-axes-headings);
+  font-feature-settings: var(--font-features-headings);
+  font-weight: var(--font-weight-headings);
+  font-size: var(--font-size-base);
+  margin-inline-start: 1ch;
+  color: var(--text-secondary);
 }
