@@ -1,0 +1,163 @@
+@import (reference) url(../global/styles/spectro-mixins.less);
+
+:root {
+    --row-duration: 350ms;
+    --row-ease: ease-out;
+    --row-gap: 0;
+    --table-columns: 80px 1.4fr 1fr 120px 64px;
+}
+
+/* -------------------- LAYOUT -------------------- */
+
+body {
+    place-items: center;
+    background-color: var(--surface-base);
+
+}
+
+main {
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    padding: var(--base-4, 24px);
+    gap: var(--base-3, 16px);
+}
+
+/* -------------------- BUTTONS -------------------- */
+
+button {
+    border: 1px solid var(--border-shiny);
+    background: var(--surface-control);
+    border-radius: var(--radius-circle);
+    padding: var(--base) var(--base-1h);
+    cursor: pointer;
+    .font-button();
+
+    &:hover {
+        background: var(--surface-control-hover);
+    }
+
+    &:active {
+        background: var(--surface-control-active);
+    }
+}
+
+/* -------------------- LIST (pseudo-table) -------------------- */
+
+.list {
+    border-radius: var(--radius-strong);
+    border: 1px solid var(--border-shiny);
+    background: var(--surface-main);
+    box-shadow: var(--elevation-subtle);
+    overflow: hidden;
+    padding: 0;
+    width: 100%;
+}
+
+/* hlavička – normální flow */
+
+.list-header {
+    display: grid;
+    grid-template-columns: var(--table-columns);
+    align-items: center;
+    background: var(--surface-main-variant);
+    border-bottom: 1px solid var(--border);
+}
+
+.list-header .cell {
+    font-weight: 500;
+}
+
+/* tělo – absolutně pozicované řádky */
+
+.list-body {
+    position: relative;
+    transition: height var(--row-duration) var(--row-ease);
+    /* výška se nastavuje z JS podle stacku */
+}
+
+.list-row,
+.list-row-ghost {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: grid;
+    grid-template-columns: var(--table-columns);
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-main);
+
+    transform-origin: top left;
+    transform:
+        translateY(var(--row-y, 0px)) scaleY(var(--row-scale, 1));
+    transition:
+        transform var(--row-duration) var(--row-ease),
+        opacity var(--row-duration) var(--row-ease),
+        background-color var(--row-duration) var(--row-ease),
+        border-color var(--row-duration) var(--row-ease);
+
+    &:last-child {
+        border-bottom-color: transparent;
+    }
+}
+
+.list-row .cell-actions button,
+.list-row-ghost .cell-actions button {
+    border-radius: 999px;
+    padding: 0;
+    display: flex;
+    place-content: center;
+    width: 24px;
+    aspect-ratio: 1;
+}
+
+/* ID / amount / actions šířky */
+
+.cell-id {
+    justify-self: flex-start;
+}
+
+.cell-amount {
+    justify-self: flex-end;
+}
+
+.cell-actions {
+    justify-self: flex-end;
+}
+
+.cell {
+    padding: var(--base) var(--base-1h);
+}
+
+/* -------------------- STAV: NOVÝ ŘÁDEK -------------------- */
+
+.list-row.is-new {
+    opacity: 0;
+}
+
+/* -------------------- STAV: GHOST (MAZÁNÍ) -------------------- */
+
+.list-row-ghost {
+    pointer-events: none;
+    z-index: 2;
+    background: var(--surface-status-error-moderate);
+    color: var(--text-primary-on-surface-status-error-moderate);
+}
+
+/* po přidání .is-removing z JS ghost scvakne */
+
+.list-row-ghost.is-removing {
+    /* scaleY se nastaví přes --row-scale z JS */
+}
+
+/* -------------------- REDUCED MOTION -------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .list-row,
+    .list-row-ghost {
+        transition: none !important;
+    }
+}

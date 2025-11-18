@@ -33,4 +33,5 @@ h1 {
   font-feature-settings: var(--font-features-headings);
   font-weight: var(--font-weight-headings);
   font-size: var(--font-size-xxxxl);
+  margin-block-end: 0;
 }

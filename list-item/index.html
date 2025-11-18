@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="cs">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Table – View Transitions Demo</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Breadcrumbs – View Transitions Demo</title>
+    <link rel="stylesheet" href="../global/styles/global.css" />
+    <link rel="stylesheet" href="../global/styles/spectro-theme.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <main>
+        <h1>List Item</h1>
+        <button id="add-row">+ Add</button>
+
+
+        <div class="list" role="table" aria-label="Orders">
+            <div class="list-header" role="row">
+                <div class="cell cell-id" role="columnheader">#</div>
+                <div class="cell" role="columnheader">Customer</div>
+                <div class="cell" role="columnheader">Status</div>
+                <div class="cell cell-amount" role="columnheader">Amount</div>
+                <div class="cell cell-actions" role="columnheader"></div>
+            </div>
+
+            <div class="list-body" role="rowgroup" id="table-body">
+                <div class="list-row" role="row">
+                    <div class="cell cell-id" role="cell">1001</div>
+                    <div class="cell" role="cell">Acme Corp</div>
+                    <div class="cell" role="cell">Shipped</div>
+                    <div class="cell cell-amount" role="cell">3 200 Kč</div>
+                    <div class="cell cell-actions" role="cell">
+                        <button class="row-delete" aria-label="Smazat řádek">✕</button>
+                    </div>
+                </div>
+
+                <div class="list-row" role="row">
+                    <div class="cell cell-id" role="cell">1002</div>
+                    <div class="cell" role="cell">Blue Fox</div>
+                    <div class="cell" role="cell">Processing</div>
+                    <div class="cell cell-amount" role="cell">980 Kč</div>
+                    <div class="cell cell-actions" role="cell">
+                        <button class="row-delete" aria-label="Smazat řádek">✕</button>
+                    </div>
+                </div>
+
+                <div class="list-row" role="row">
+                    <div class="cell cell-id" role="cell">1003</div>
+                    <div class="cell" role="cell">Delta Group</div>
+                    <div class="cell" role="cell">Pending</div>
+                    <div class="cell cell-amount" role="cell">5 430 Kč</div>
+                    <div class="cell cell-actions" role="cell">
+                        <button class="row-delete" aria-label="Smazat řádek">✕</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
