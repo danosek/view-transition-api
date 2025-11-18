@@ -76,8 +76,7 @@
             row.dataset.y = String(y);
             row.style.setProperty("--row-y", `${Math.round(y)}px`);
 
-            // u nového řádku necháme scale tak, jak jsme ho nastavili (0 / 0.1),
-            // ostatním ho vracíme na 1
+            // normální řádky mají scale 1 (nové si řeší scale samy)
             if (!row.classList.contains("is-new")) {
                 row.style.setProperty("--row-scale", "1");
             }
@@ -95,7 +94,7 @@
     window.addEventListener("load", () => {
         const rows = Array.from(body.querySelectorAll(".list-row"));
 
-        // vypnout transition přes inline styl, aby se první layout neanimoval
+        // vypnout transition při prvním layoutu
         rows.forEach((row) => {
             row.dataset._origTransition = row.style.transition || "";
             row.style.transition = "none";
@@ -103,7 +102,6 @@
 
         layoutRows();
 
-        // v dalším frame vrátit transition, aby další změny už byly animované
         requestAnimationFrame(() => {
             rows.forEach((row) => {
                 row.style.transition = row.dataset._origTransition || "";
@@ -148,7 +146,7 @@
         const delBtn = document.createElement("button");
         delBtn.className = "row-delete";
         delBtn.setAttribute("aria-label", "Smazat řádek");
-        delBtn.textContent = "✕";
+        delBtn.textContent = "–";
 
         actionsCell.appendChild(delBtn);
 
@@ -180,7 +178,7 @@
         const finalY = Number(row.dataset.y || "0");
         row.style.setProperty("--row-y", `${Math.round(finalY)}px`);
 
-        // v dalším frame přepnout scale 0 → 1 a opacity 0 → 1
+        // v dalším frame: scale 0 → 1 a opacity 0 → 1
         requestAnimationFrame(() => {
             row.classList.remove("is-new");
             row.style.opacity = "1";
@@ -189,44 +187,61 @@
     };
 
     // ------------------------------------
-    //  Mazání řádku – ghost + collapse
+    //  Mazání řádku – 2 fáze:
+    //   1) buňky: slide + fade
+    //   2) ghost: height → 0, ostatní se posunou
     // ------------------------------------
 
     const removeRow = (row) => {
         if (!row || !row.isConnected) return;
 
         const y = Number(row.dataset.y || "0");
+        const originalHeight = row.offsetHeight;
 
-        // ghost, který vizuálně nahradí řádek a scvakne se
+        // ghost řádek na stejné pozici, se stejným obsahem
         const ghost = document.createElement("div");
         ghost.className = "list-row list-row-ghost";
         ghost.setAttribute("role", "presentation");
         ghost.innerHTML = row.innerHTML;
 
         ghost.style.setProperty("--row-y", `${Math.round(y)}px`);
-        ghost.style.setProperty("--row-scale", "1");
         ghost.style.opacity = "1";
+        ghost.style.height = `${originalHeight}px`;
 
         body.appendChild(ghost);
 
-        // původní řádek pryč + relayout ostatních
+        // původní řádek pryč, ale layout rows zatím NE
         row.remove();
-        layoutRows();
 
-        // collapse ghostu
+        // fáze 1: buňky ghostu jedou doleva + fade out
         requestAnimationFrame(() => {
-            ghost.classList.add("is-removing");
-            ghost.style.setProperty("--row-scale", "0.1");
-            ghost.style.opacity = "0";
+            ghost.classList.add("is-removing-phase1");
         });
 
-        const onEnd = (event) => {
-            if (event.propertyName !== "transform") return;
-            ghost.removeEventListener("transitionend", onEnd);
+        const firstCell = ghost.querySelector(".cell");
+        if (firstCell) {
+            const onCellEnd = (event) => {
+                if (event.propertyName !== "opacity") return;
+                firstCell.removeEventListener("transitionend", onCellEnd);
+
+                // fáze 2: teď teprve posuneme ostatní nahoru (layoutRows)
+                layoutRows();
+
+                // a ghost se začne reálně zmenšovat na výšku 0
+                ghost.classList.add("is-removing-phase2");
+                ghost.style.height = "0px";
+            };
+
+            firstCell.addEventListener("transitionend", onCellEnd);
+        }
+
+        const onRowEnd = (event) => {
+            if (event.propertyName !== "height") return;
+            ghost.removeEventListener("transitionend", onRowEnd);
             if (ghost.isConnected) ghost.remove();
         };
 
-        ghost.addEventListener("transitionend", onEnd);
+        ghost.addEventListener("transitionend", onRowEnd);
     };
 
     // ------------------------------------

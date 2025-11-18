@@ -1,6 +1,12 @@
 :root {
-  --row-duration: 350ms;
-  --row-ease: ease-out;
+  /* hlavní časování */
+  --row-move-duration: 150ms;
+  /* přeskládání řádků, přidání */
+  --row-collapse-duration: 150ms;
+  /* smršťování ghost řádku */
+  --row-cell-exit-duration: 150ms;
+  /* slide + fade buněk při mazání */
+  --row-ease: ease-in;
   --row-gap: 0;
   --table-columns: 80px 1.4fr 1fr 120px 64px;
 }
@@ -61,7 +67,7 @@ button:active {
 /* tělo – absolutně pozicované řádky */
 .list-body {
   position: relative;
-  transition: height var(--row-duration) var(--row-ease);
+  transition: height var(--row-move-duration) var(--row-ease);
   /* výška se nastavuje z JS podle stacku */
 }
 .list-row,
@@ -76,7 +82,7 @@ button:active {
   background: var(--surface-main);
   transform-origin: top left;
   transform: translateY(var(--row-y, 0px)) scaleY(var(--row-scale, 1));
-  transition: transform var(--row-duration) var(--row-ease), opacity var(--row-duration) var(--row-ease), background-color var(--row-duration) var(--row-ease), border-color var(--row-duration) var(--row-ease);
+  transition: transform var(--row-move-duration) var(--row-ease), opacity var(--row-move-duration) var(--row-ease), background-color var(--row-move-duration) var(--row-ease), border-color var(--row-move-duration) var(--row-ease);
 }
 .list-row:last-child,
 .list-row-ghost:last-child {
@@ -88,8 +94,20 @@ button:active {
   padding: 0;
   display: flex;
   place-content: center;
-  width: 24px;
+  width: 20px;
   aspect-ratio: 1;
+  color: var(--text-status-error);
+  border-color: currentColor;
+  line-height: 1;
+  background-color: transparent;
+}
+.list-row .cell-actions button:hover,
+.list-row-ghost .cell-actions button:hover {
+  background: var(--surface-status-error-minimal-hover);
+}
+.list-row .cell-actions button:active,
+.list-row-ghost .cell-actions button:active {
+  background: var(--surface-status-error-minimal-active);
 }
 /* ID / amount / actions šířky */
 .cell-id {
@@ -114,15 +132,30 @@ button:active {
   z-index: 2;
   background: var(--surface-status-error-moderate);
   color: var(--text-primary-on-surface-status-error-moderate);
+  overflow: hidden;
+  /* výška animujeme, Y zůstává přes transform */
+  transition: height var(--row-collapse-duration) var(--row-ease), background-color var(--row-move-duration) var(--row-ease), border-color var(--row-move-duration) var(--row-ease);
 }
-/* po přidání .is-removing z JS ghost scvakne */
-.list-row-ghost.is-removing {
-  /* scaleY se nastaví přes --row-scale z JS */
+/* buňky v ghostu – fáze 1: slide + fade */
+.list-row-ghost .cell {
+  transition: transform var(--row-cell-exit-duration) var(--row-ease), opacity var(--row-cell-exit-duration) var(--row-ease);
+}
+/* FÁZE 1 – buňky jedou doleva a mizí */
+.list-row-ghost.is-removing-phase1 .cell {
+  transform: translateX(-8px);
+  opacity: 0;
+}
+/* FÁZE 2 – collapse výšky: height jde z původní px → 0 v JS */
+.list-row-ghost.is-removing-phase2 {
+  /* height se animuje, není potřeba nic dalšího */
 }
 /* -------------------- REDUCED MOTION -------------------- */
 @media (prefers-reduced-motion: reduce) {
   .list-row,
   .list-row-ghost {
+    transition: none !important;
+  }
+  .list-row-ghost .cell {
     transition: none !important;
   }
 }
