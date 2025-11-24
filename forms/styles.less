@@ -1,0 +1,182 @@
+@import (reference) url(../global/styles/spectro-mixins.less);
+
+:root {
+    --vt-duration: 300ms;
+    --vt-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-width: 260px;
+    --color-accent: var(--brand-primary-60); 
+}
+
+/* -------------------- ZÁKLAD A LAYOUT -------------------- */
+
+body {
+    height: 100vh;
+    overflow: hidden; 
+}
+
+app-shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    height: 100%;
+    background-color: var(--surface-base);
+}
+
+/* -------------------- LEVÝ PANEL -------------------- */
+
+app-sidebar {
+    background: var(--surface-main);
+    border-right: 1px solid var(--border);
+    
+    display: flex;
+    flex-direction: column;
+    
+    padding: var(--base-3);
+    gap: var(--base-3);
+    
+    z-index: 10;
+
+    .brand {
+        font-family: var(--font-stack-headings);
+        font-weight: var(--font-weight-headings);
+        font-size: var(--font-size-l);
+        
+        color: var(--text-primary);
+        padding-bottom: var(--base-2);
+        border-bottom: 1px solid var(--border-shiny);
+    }
+
+    nav {
+        display: flex;
+        flex-direction: column;
+        gap: var(--base);
+    }
+
+    button {
+        text-align: left;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius);
+        padding: var(--base-1h) var(--base-2);
+        cursor: pointer;
+        
+        font-family: var(--font-stack-main); 
+        font-weight: 600;
+        color: var(--text-secondary);
+        
+        transition: background 0.2s, color 0.2s;
+
+        &:hover {
+            background: var(--surface-control-hover);
+            color: var(--text-primary);
+        }
+
+        &.active {
+            background: var(--surface-control-active);
+            color: var(--color-accent); 
+            position: relative;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 10%;
+                bottom: 10%;
+                width: 4px;
+                background: var(--color-accent);
+                border-radius: 0 4px 4px 0;
+            }
+        }
+    }
+}
+
+/* -------------------- PRAVÝ PANEL -------------------- */
+
+app-content {
+    background: var(--surface-base);
+    padding: var(--base-6);
+    overflow-y: auto;
+    
+    // View Transition
+    view-transition-name: formPage;
+
+    h2 {
+        margin-top: 0;
+        margin-bottom: var(--base-3);
+    }
+
+    .form-group {
+        margin-bottom: var(--base-2);
+        display: flex;
+        flex-direction: column;
+        gap: var(--base);
+
+        label {
+            font-size: var(--font-size-s);
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        input, textarea {
+            padding: var(--base-1h);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface-main);
+            color: var(--text-primary);
+            font-family: inherit;
+            
+            &:focus {
+                outline: 2px solid var(--color-accent);
+                border-color: transparent;
+            }
+        }
+    }
+
+    .actions {
+        margin-top: var(--base-4);
+        border-top: 1px solid var(--border);
+        padding-top: var(--base-3);
+
+        button.primary {
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            padding: var(--base-1h) var(--base-3);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: bold;
+            font-family: var(--font-stack-main);
+            
+            &:hover {
+               opacity: 0.9;
+            }
+        }
+    }
+}
+
+/* -------------------- ANIMACE -------------------- */
+
+::view-transition-old(formPage) {
+    animation: fade-out var(--vt-duration) var(--vt-ease) both;
+    transform-origin: top center;
+}
+
+::view-transition-new(formPage) {
+    animation: slide-up-fade-in var(--vt-duration) var(--vt-ease) both;
+}
+
+@keyframes fade-out {
+    to { opacity: 0; transform: scale(0.98); }
+}
+
+@keyframes slide-up-fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+}

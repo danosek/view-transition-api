@@ -33,3 +33,26 @@ ol {
         }
     }
 }
+
+html {
+    background-color: var(--surface-base);
+    min-height: 100%;
+}
+
+body {
+    background-color: transparent;
+    min-height: 100vh;
+    position: relative;
+}
+
+#mushroom-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    color: var(--text-secondary); 
+    opacity: 0.6; 
+}

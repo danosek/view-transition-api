@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="cs">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>App Forms Switch – View Transitions</title>
+    <link rel="stylesheet" href="../global/styles/global.css" />
+    <link rel="stylesheet" href="../global/styles/spectro-theme.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <app-shell>
+        
+        <app-sidebar>
+            <div class="brand">Multiweb</div>
+            <nav id="menu">
+                <button data-form="personal" class="active">Osobní údaje</button>
+                <button data-form="settings">Nastavení</button>
+                <button data-form="notifications">Notifikace</button>
+                <button data-form="billing">Fakturace</button>
+            </nav>
+        </app-sidebar>
+
+        <app-content id="contentArea">
+            </app-content>
+
+    </app-shell>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
