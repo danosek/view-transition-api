@@ -2,9 +2,9 @@
   --vt-duration: 600ms;
   --vt-ease: cubic-bezier(0.4, 0, 0.2, 1);
   --sidebar-width: 260px;
+  --header-height: 80px;
   --color-accent: var(--brand-primary-60);
 }
-/* -------------------- ZÁKLAD A LAYOUT -------------------- */
 body {
   height: 100vh;
   overflow: hidden;
@@ -69,16 +69,48 @@ app-sidebar button.active::before {
   background: var(--color-accent);
   border-radius: 0 4px 4px 0;
 }
-/* -------------------- PRAVÝ PANEL -------------------- */
+/* -------------------- PRAVÝ PANEL ------------------- */
+app-main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+/* -------------------- HLAVIČKA -------------------- */
+app-header {
+  height: var(--header-height);
+  background: var(--surface-base);
+  padding: 0 var(--base-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+app-header .breadcrumbs {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+app-header h1 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+  view-transition-name: headerTitle;
+  width: fit-content;
+}
+/* -------------------- OBSAH -------------------- */
 app-content {
+  flex: 1;
   background: var(--surface-base);
   padding: var(--base-6);
   overflow-y: auto;
   view-transition-name: formPage;
 }
 app-content h2 {
-  margin-top: 0;
-  margin-bottom: var(--base-3);
+  display: none;
 }
 app-content .form-group {
   margin-bottom: var(--base-2);
@@ -123,24 +155,57 @@ app-content .actions button.primary {
 app-content .actions button.primary:hover {
   opacity: 0.9;
 }
-/* -------------------- ANIMACE -------------------- */
+/* -------------------- DEFINICE ANIMACÍ -------------------- */
+::view-transition-group(headerTitle) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(headerTitle),
+::view-transition-new(headerTitle) {
+  object-fit: none;
+  object-position: 0 50%;
+  height: 100%;
+  width: 100%;
+}
+::view-transition-old(headerTitle) {
+  animation: slide-out-right var(--vt-duration) var(--vt-ease) both;
+}
+::view-transition-new(headerTitle) {
+  animation: slide-in-left var(--vt-duration) var(--vt-ease) both;
+}
 ::view-transition-old(formPage) {
-  animation: fade-out var(--vt-duration) var(--vt-ease) both;
+  animation: fade-out-vertical var(--vt-duration) var(--vt-ease) both;
   transform-origin: top center;
 }
 ::view-transition-new(formPage) {
   animation: slide-up-fade-in var(--vt-duration) var(--vt-ease) both;
 }
-@keyframes fade-out {
+@keyframes slide-out-right {
   to {
     opacity: 0;
-    transform: scale(0.995);
+    transform: translateX(30px);
+  }
+}
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes fade-out-vertical {
+  to {
+    opacity: 0;
+    transform: scale(0.99);
   }
 }
 @keyframes slide-up-fade-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
