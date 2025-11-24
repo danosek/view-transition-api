@@ -1,5 +1,5 @@
 :root {
-  --vt-duration: 300ms;
+  --vt-duration: 600ms;
   --vt-ease: cubic-bezier(0.4, 0, 0.2, 1);
   --sidebar-width: 260px;
   --color-accent: var(--brand-primary-60);
@@ -134,13 +134,13 @@ app-content .actions button.primary:hover {
 @keyframes fade-out {
   to {
     opacity: 0;
-    transform: scale(0.98);
+    transform: scale(0.995);
   }
 }
 @keyframes slide-up-fade-in {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

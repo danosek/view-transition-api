@@ -64,7 +64,11 @@ dialog {
 
     width: 100%;
     max-width: 450px;
-    margin: auto;
+    
+    /* --- FIX PRO SAFARI --- */
+    position: fixed; 
+    inset: 0;        
+    margin: auto; 
 
     opacity: 0;
     transform: scale(0.9) translateY(10px);

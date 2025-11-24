@@ -1,7 +1,7 @@
 @import (reference) url(../global/styles/spectro-mixins.less);
 
 :root {
-    --vt-duration: 300ms;
+    --vt-duration: 600ms;
     --vt-ease: cubic-bezier(0.4, 0, 0.2, 1);
     --sidebar-width: 260px;
     --color-accent: var(--brand-primary-60); 
@@ -157,20 +157,29 @@ app-content {
 
 ::view-transition-old(formPage) {
     animation: fade-out var(--vt-duration) var(--vt-ease) both;
-    transform-origin: top center;
+    transform-origin: top center; 
 }
 
 ::view-transition-new(formPage) {
-    animation: slide-up-fade-in var(--vt-duration) var(--vt-ease) both;
+    animation: slide-up-fade-in var(--vt-duration) var(--vt-ease) both; 
 }
 
 @keyframes fade-out {
-    to { opacity: 0; transform: scale(0.98); }
+    to {
+        opacity: 0;
+        transform: scale(0.995); 
+    }
 }
 
 @keyframes slide-up-fade-in {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px); 
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0); 
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
