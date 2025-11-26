@@ -46,7 +46,7 @@
             `
         },
         billing: {
-            title: 'Fakturace a platby',
+            title: 'Fakturace / Položky externích zakázek / Údaje pro fakturaci',
             html: `
                 <div class="form-group">
                     <label>IČO</label>
