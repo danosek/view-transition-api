@@ -13,32 +13,29 @@
 <body>
     <main>
         <h1>Modal Dialog</h1>
-        <p>Ukázka animace nativního dialogu pomocí moderního CSS.</p>
-        
-        <button id="openModal" class="primary">Otevřít nastavení</button>
+        <br />
+
+        <button id="openModal" class="primary">Open</button>
     </main>
 
     <dialog id="myDialog">
-        <form method="dialog"> <header>
-                <h2>Nastavení účtu</h2>
+        <form method="dialog">
+            <header>
+                <h2>Hello World</h2>
                 <button class="icon-only" aria-label="Zavřít">✕</button>
             </header>
 
             <div class="dialog-content">
-                <label>
-                    <span>Uživatelské jméno</span>
-                    <input type="text" value="Jan Novák" />
-                </label>
+                <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. In convallis. Integer rutrum, orci
+                    vestibulum ullamcorper ultricies, lacus quam ultricies odio, vitae placerat pede sem sit amet enim.
+                    In enim a arcu imperdiet malesuada.</p>
 
-                <label>
-                    <span>E-mail</span>
-                    <input type="email" value="jan@novak.cz" />
-                </label>
+                <p>Etiam dictum tincidunt diam. Fusce tellus. Aliquam erat volutpat. Cum sociis natoque penatibus et
+                    magnis dis parturient montes, nascetur ridiculus mus.</p>
             </div>
-
             <footer>
-                <button type="button" id="closeModal" class="secondary">Zrušit</button>
-                <button value="confirm" class="primary">Uložit změny</button>
+                <button type="button" id="closeModal" class="secondary">Nope</button>
+                <button value="confirm" class="primary">Yep</button>
             </footer>
 
         </form>
