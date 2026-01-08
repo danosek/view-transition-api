@@ -1,0 +1,138 @@
+/* Definice proměnných dle dokumentace (Teaf UI) */
+:root {
+  /* Mapování na Spectro Theme */
+  --teaf-ui-dropdown-bg: var(--surface-main, #fff);
+  --teaf-ui-dropdown-border-radius: var(--radius-strong, 12px);
+  --teaf-ui-dropdown-shadow: var(--elevation-strong);
+  --teaf-ui-dropdown-border: 1px solid var(--border-subtle);
+  --teaf-ui-dropdown-item-padding: 10px 16px;
+  --teaf-ui-dropdown-item-hover-bg: var(--surface-control-hover);
+  --teaf-ui-dropdown-item-gap: 12px;
+  --teaf-ui-dropdown-width: 240px;
+  /* Animace */
+  --dropdown-transition: 200ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+/* -------------------- LAYOUT -------------------- */
+body {
+  background-color: var(--surface-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px;
+  gap: 24px;
+  min-height: 100vh;
+}
+.demo-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+/* -------------------- TRIGGER -------------------- */
+.btn-trigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-control);
+  border: 1px solid var(--border);
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: background 0.2s, border-color 0.2s;
+  /* Indikace otevření - otočení šipky */
+}
+.btn-trigger:hover {
+  background: var(--surface-control-hover);
+  border-color: var(--border-shiny);
+}
+.btn-trigger[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+.btn-trigger .chevron {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+/* -------------------- DROPDOWN (POPOVER) -------------------- */
+.teaf-ui-dropdown {
+  /* Základní vzhled */
+  background: var(--teaf-ui-dropdown-bg);
+  border-radius: var(--teaf-ui-dropdown-border-radius);
+  box-shadow: var(--teaf-ui-dropdown-shadow);
+  border: var(--teaf-ui-dropdown-border);
+  width: var(--teaf-ui-dropdown-width);
+  padding: 8px;
+  /* Padding kontejneru */
+  /* Pozicování: Popover API ho dává do Top Layer, my ho budeme pozicovat přes JS (anchor style) */
+  position: fixed;
+  margin: 0;
+  /* Reset default marginu popoveru */
+  inset: auto;
+  /* Reset default pozice */
+  /* ANIMACE - PŘÍCHOD A ODCHOD */
+  /* 1. Výchozí stav (skryto/zavřeno) */
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+  /* 2. Transition */
+  /* allow-discrete je nutné pro animaci vlastnosti display/overlay */
+  transition: opacity var(--dropdown-transition), transform var(--dropdown-transition), overlay var(--dropdown-transition) allow-discrete, display var(--dropdown-transition) allow-discrete;
+  /* 3. Stav OTEVŘENO (:popover-open) */
+  /* 4. @starting-style - definuje počáteční stav při "příchodu" do DOMu */
+}
+.teaf-ui-dropdown:popover-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+@starting-style {
+  .teaf-ui-dropdown:popover-open {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+}
+/* Položky menu */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--teaf-ui-dropdown-item-gap);
+  padding: var(--teaf-ui-dropdown-item-padding);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.1s;
+  text-decoration: none;
+  user-select: none;
+  /* Danger varianta */
+}
+.dropdown-item:hover,
+.dropdown-item:focus-visible {
+  background: var(--teaf-ui-dropdown-item-hover-bg);
+  outline: none;
+}
+.dropdown-item .icon {
+  font-size: 16px;
+  opacity: 0.7;
+}
+.dropdown-item.danger {
+  color: var(--status-error, #d32f2f);
+}
+.dropdown-item.danger .icon {
+  opacity: 1;
+}
+.dropdown-item.danger:hover {
+  background: var(--surface-status-error-subtle, #ffebee);
+}
+.dropdown-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 6px 0;
+}
+/* Status log jen pro demo */
+.status-log {
+  margin-top: 20px;
+  font-family: monospace;
+  color: var(--text-secondary);
+  font-size: 12px;
+}

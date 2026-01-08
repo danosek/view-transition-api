@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="cs">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Dropdown – External Control Demo</title>
+    <link rel="stylesheet" href="../global/styles/global.css" />
+    <link rel="stylesheet" href="../global/styles/spectro-theme.css" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <main>
+        <h1>Dropdown Menu</h1>
+
+        <div class="demo-wrapper">
+            
+            <button id="dropdownTrigger" 
+                    class="btn-trigger"
+                    aria-haspopup="menu" 
+                    aria-expanded="false" 
+                    aria-controls="myDropdown">
+                <span>Možnosti</span>
+                <span class="chevron">▼</span>
+            </button>
+
+            <div id="myDropdown" class="teaf-ui-dropdown" popover="manual" role="menu" aria-labelledby="dropdownTrigger">
+                
+                <div class="dropdown-item" role="menuitem" tabindex="0">
+                    <span class="icon">✏️</span>
+                    <span class=\"content\">Upravit položku</span>
+                </div>
+                
+                <div class="dropdown-item" role="menuitem" tabindex="0">
+                    <span class="icon">🔗</span>
+                    <span class="content">Kopírovat odkaz</span>
+                </div>
+
+                <div class="dropdown-item" role="menuitem" tabindex="0">
+                    <span class="icon">📤</span>
+                    <span class="content">Sdílet...</span>
+                </div>
+
+                <div class="dropdown-divider"></div>
+
+                <div class="dropdown-item danger" role="menuitem" tabindex="0">
+                    <span class="icon">🗑️</span>
+                    <span class="content">Odstranit</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- <div id="statusLog" class="status-log">Stav: Closed</div> -->
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

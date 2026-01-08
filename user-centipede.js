@@ -1,218 +1,415 @@
-/**
- * user-centipede.js
- * Vyladěná stonožka: Menší hitbox, Kanibalismus (self-damage)
- */
+// /**
+//  * user-centipede.js -> NEON TUBE RUNNER v2
+//  * UI Dock vpravo, barevné zóny (zrychlení/zpomalení), světlejší pozadí.
+//  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.createElement('canvas');
-    canvas.id = 'user-canvas';
-    document.body.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
+// document.addEventListener('DOMContentLoaded', () => {
+//     const canvas = document.createElement('canvas');
+//     canvas.id = 'user-canvas';
+//     document.body.appendChild(canvas);
+//     const ctx = canvas.getContext('2d', { alpha: false });
+
+//     // --- BARVY A KONFIGURACE ---
+//     let width, height;
+//     let gameWidth, sidebarWidth;
     
-    let computedStyle = getComputedStyle(document.body);
-    let strokeColor = '#aaaaaa'; 
-    let bgColor = '#121212';
+//     // Paleta
+//     const colors = {
+//         bg: '#1a1a24',        // Světlejší "noc" (ne úplně černá)
+//         uiBg: '#111118',      // Tmavší panel pro UI
+//         grid: '#2a2a35',      // Barva mřížky v pozadí
+//         wireframe: '#444455', // Barva kruhů tunelu
+//         uiText: '#eeeeee',
+//         red: '#ff2a2a',       // Smrt
+//         yellow: '#ffd700',    // Zpomalení
+//         green: '#00ff99',     // Zrychlení
+//         ship: '#ffffff'
+//     };
+
+//     const resize = () => {
+//         width = canvas.width = window.innerWidth;
+//         height = canvas.height = window.innerHeight;
+        
+//         // Rozdělení: 75% hra, 25% UI (minimálně 250px)
+//         sidebarWidth = Math.max(width * 0.25, 250);
+//         gameWidth = width - sidebarWidth;
+        
+//         ctx.lineJoin = 'round';
+//     };
+//     window.addEventListener('resize', resize);
+//     resize();
+
+//     // --- OVLÁDÁNÍ ---
+//     const keys = { ArrowLeft: false, ArrowRight: false, a: false, d: false, ' ': false };
     
-    let score = 0;
-    let scoreOpacity = 0;
-    let damageFlash = 0; 
+//     window.addEventListener('keydown', (e) => {
+//         if (keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key] = true;
+//     });
+//     window.addEventListener('keyup', (e) => {
+//         if (keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key] = false;
+//     });
 
-    const updateColor = () => {
-        const tempDiv = document.createElement('div');
-        tempDiv.style.color = 'var(--text-secondary)'; 
-        document.body.appendChild(tempDiv);
-        const style = getComputedStyle(tempDiv);
-        if(style.color) strokeColor = style.color;
-        let bg = getComputedStyle(document.body).backgroundColor;
-        if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') bgColor = bg;
-        else { bg = getComputedStyle(document.documentElement).backgroundColor; if (bg !== 'rgba(0, 0, 0, 0)') bgColor = bg; }
-        document.body.removeChild(tempDiv);
-    };
-    updateColor();
+//     // --- HERNÍ LOGIKA ---
+    
+//     class TunnelGame {
+//         constructor() {
+//             this.reset();
+//         }
 
-    let width, height;
-    function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-        updateColor();
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    window.addEventListener('bugEscaped', (e) => {
-        score -= e.detail.points; 
-        scoreOpacity = 2.0;
-    });
-
-    const keys = { ArrowUp:false, ArrowDown:false, ArrowLeft:false, ArrowRight:false, w:false, s:false, a:false, d:false };
-    window.addEventListener('keydown', (e) => { if(keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) { keys[e.key]=true; if(e.key.startsWith('Arrow')) e.preventDefault(); } });
-    window.addEventListener('keyup', (e) => { if(keys.hasOwnProperty(e.key) || keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key]=false; });
-
-    class Centipede {
-        constructor() {
-            this.x = width / 2; this.y = height - 100;
-            this.segmentCount = 8; this.segments = []; this.gap = 18; 
-            for (let i = 0; i < this.segmentCount; i++) this.segments.push({ x: this.x, y: this.y + i * 5 });
-            this.speed = 4.0; this.walkCycle = 0; this.moving = false;
-            this.recoilTimer = 0; this.recoilDir = {x:0, y:0};
-        }
-
-        grow() {
-            const tail = this.segments[this.segments.length - 1];
-            this.segments.push({ x: tail.x, y: tail.y });
-        }
-
-        takeDamage(sourceX, sourceY) {
-            if (this.recoilTimer > 0) return; 
-            const dx = this.segments[0].x - sourceX;
-            const dy = this.segments[0].y - sourceY;
-            const len = Math.sqrt(dx*dx + dy*dy) || 1;
-            this.recoilDir = { x: dx/len, y: dy/len };
-            this.recoilTimer = 20; 
-            score -= 50; scoreOpacity = 2.0; damageFlash = 1.0; 
-        }
-
-        update() {
-            const head = this.segments[0];
-            const depthFactor = Math.max(0.2, head.y / height);
-            const lengthPenalty = Math.max(0.5, 1 - (this.segments.length * 0.01));
-            const currentSpeed = this.speed * depthFactor * 1.5 * lengthPenalty;
-
-            let dx = 0; let dy = 0; this.moving = false;
-            if (this.recoilTimer > 0) {
-                this.recoilTimer--; dx = this.recoilDir.x * 2; dy = this.recoilDir.y * 2; this.moving = true;
-            } else {
-                if (keys.ArrowUp || keys.w) dy -= 1;
-                if (keys.ArrowDown || keys.s) dy += 1;
-                if (keys.ArrowLeft || keys.a) dx -= 1;
-                if (keys.ArrowRight || keys.d) dx += 1;
-            }
-
-            if (dx !== 0 || dy !== 0) {
-                this.moving = true; this.walkCycle += 0.2;
-                if (this.recoilTimer <= 0) { const length = Math.sqrt(dx*dx + dy*dy); dx /= length; dy /= length; }
-                head.x += dx * currentSpeed; head.y += dy * currentSpeed;
-                head.x = Math.max(0, Math.min(width, head.x)); head.y = Math.max(height * 0.2, Math.min(height, head.y));
-            }
-
-            for (let i = 1; i < this.segments.length; i++) {
-                const prev = this.segments[i - 1]; const curr = this.segments[i];     
-                const dx = prev.x - curr.x; const dy = prev.y - curr.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                const angle = Math.atan2(dy, dx);
-                const targetGap = this.gap * depthFactor;
-                if (dist > targetGap) {
-                    const moveDist = dist - targetGap;
-                    curr.x += Math.cos(angle) * moveDist; curr.y += Math.sin(angle) * moveDist;
-                }
-            }
+//         reset() {
+//             this.segments = [];
+//             this.segmentCount = 28; 
+//             this.segmentDepth = 80; 
+//             this.fov = 350; 
             
-            // === NOVÉ: SAMO-POŠKOZENÍ (KANIBALISMUS) ===
-            // Kontrolujeme kolizi hlavy s tělem (od 4. článku dál, abychom se nekousali do krku při zatáčení)
-            if (this.recoilTimer <= 0 && this.segments.length > 5) {
-                for (let i = 4; i < this.segments.length; i++) {
-                    const seg = this.segments[i];
-                    const dx = head.x - seg.x;
-                    const dy = head.y - seg.y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
+//             this.playerAngle = 0;
+//             this.speed = 10;
+//             this.baseSpeed = 10; // Cílová rychlost (pro návrat po zrychlení/zpomalení)
+//             this.score = 0;
+//             this.distance = 0;
+//             this.gameOver = false;
+//             this.rotationSpeed = 0;
+//             this.effectMessage = ""; // Zpráva "BOOST!", "SLOW!"
+//             this.effectTimer = 0;
+
+//             // Inicializace tunelu (bezpečný start)
+//             for (let i = 0; i < this.segmentCount; i++) {
+//                 this.segments.push(this.createSegment(i * this.segmentDepth, true));
+//             }
+//         }
+
+//         createSegment(z, safe = false) {
+//             let obstacle = null;
+            
+//             // Logika generování překážek
+//             if (!safe && Math.random() < 0.45) { // 45% šance na něco v segmentu
+//                 const centerAngle = Math.random() * Math.PI * 2;
+//                 const size = Math.random() * 1.2 + 0.6;
+                
+//                 // Typ překážky
+//                 const rnd = Math.random();
+//                 let type = 'red'; // Default smrt
+//                 if (rnd > 0.75) type = 'yellow'; // 15% šance zpomalení
+//                 if (rnd > 0.90) type = 'green';  // 10% šance zrychlení
+
+//                 obstacle = {
+//                     type: type,
+//                     start: centerAngle - size/2,
+//                     end: centerAngle + size/2,
+//                     center: centerAngle
+//                 };
+//             }
+//             return { z: z, obstacle: obstacle };
+//         }
+
+//         update() {
+//             if (this.gameOver) {
+//                  if (keys[' ']) this.restartWithTransition();
+//                  return;
+//             }
+
+//             // Rotace
+//             if (keys.ArrowLeft || keys.a) this.rotationSpeed -= 0.006;
+//             if (keys.ArrowRight || keys.d) this.rotationSpeed += 0.006;
+//             this.rotationSpeed *= 0.92; // Tlumení
+//             this.playerAngle += this.rotationSpeed;
+//             this.playerAngle = (this.playerAngle % (Math.PI * 2));
+//             if (this.playerAngle < 0) this.playerAngle += Math.PI * 2;
+
+//             // Rychlost a návrat k normálu
+//             if (this.speed > this.baseSpeed) this.speed *= 0.99; // Zpomalování po boostu
+//             if (this.speed < this.baseSpeed) this.speed += 0.1;  // Zrychlování po blátě
+            
+//             this.baseSpeed += 0.002; // Hra se časem zrychluje globálně
+//             this.distance += this.speed;
+//             this.score += Math.floor(this.speed / 5);
+
+//             // UI Timer efektů
+//             if (this.effectTimer > 0) this.effectTimer--;
+
+//             // Posun segmentů
+//             const lastZ = Math.max(...this.segments.map(s => s.z));
+            
+//             for (let i = 0; i < this.segments.length; i++) {
+//                 let seg = this.segments[i];
+//                 seg.z -= this.speed;
+
+//                 if (seg.z < -this.fov) {
+//                     seg.z = lastZ + this.segmentDepth; // Recyklace
+//                     const newSegData = this.createSegment(seg.z);
+//                     seg.obstacle = newSegData.obstacle;
+//                 }
+
+//                 // --- KOLIZE ---
+//                 if (seg.z > -20 && seg.z < 20 && seg.obstacle) {
+//                     // Výpočet relativního úhlu
+//                     let relativeObstacleCenter = seg.obstacle.center - this.playerAngle;
+//                     relativeObstacleCenter = Math.atan2(Math.sin(relativeObstacleCenter), Math.cos(relativeObstacleCenter));
+//                     const playerPos = Math.PI / 2; // Hráč je dole
+//                     const diff = Math.abs(relativeObstacleCenter - playerPos);
                     
-                    // Kolizní rádius těla
-                    if (dist < 15 * depthFactor) {
-                        this.takeDamage(seg.x, seg.y);
-                        break; // Stačí jedno kousnutí
-                    }
-                }
-            }
+//                     // Kontakt!
+//                     if (diff < (seg.obstacle.end - seg.obstacle.start)/2) {
+//                         this.handleCollision(seg.obstacle.type);
+//                         // Odstraníme překážku po kolizi, aby neblikala
+//                         seg.obstacle = null; 
+//                     }
+//                 }
+//             }
+//             this.segments.sort((a, b) => b.z - a.z);
+//         }
 
-            // === LOVENÍ A KOLIZE ===
-            if (window.forestEntities) {
-                window.forestEntities.forEach(entity => {
-                    if (entity.isBug && !entity.markedForDeletion) {
-                        const dx = head.x - entity.x;
-                        const dy = head.y - entity.y;
-                        const dist = Math.sqrt(dx*dx + dy*dy);
-                        
-                        // ZMĚNA: Menší rádius (25 místo 50). Musíš mířit přesněji hlavou.
-                        const eatRadius = 25 * depthFactor; 
+//         handleCollision(type) {
+//             if (type === 'red') {
+//                 this.gameOver = true;
+//                 if (document.startViewTransition) document.startViewTransition(() => {}); // Jen trigger pro efekt
+//             } else if (type === 'yellow') {
+//                 this.speed = 2; // Drastické zpomalení
+//                 this.effectMessage = "SLOW DOWN!";
+//                 this.effectTimer = 60;
+//                 // Screen shake by šel přidat, ale nechme to čisté
+//             } else if (type === 'green') {
+//                 this.speed += 30; // Boost
+//                 this.score += 500;
+//                 this.effectMessage = "BOOST +500!";
+//                 this.effectTimer = 60;
+//             }
+//         }
 
-                        if (dist < eatRadius) {
-                            if (entity.spiked) {
-                                this.takeDamage(entity.x, entity.y);
-                            } else {
-                                entity.die(); 
-                                score += (entity.points || 10);
-                                scoreOpacity = 2.0; 
-                                this.grow(); 
-                            }
-                        }
-                    }
-                });
-            }
-        }
+//         async restartWithTransition() {
+//             if (document.startViewTransition) {
+//                 const transition = document.startViewTransition(() => {
+//                     this.reset();
+//                 });
+//                 await transition.finished;
+//             } else {
+//                 this.reset();
+//             }
+//         }
 
-        draw(ctx) {
-            ctx.save();
-            if (this.recoilTimer > 0 && Math.floor(Date.now() / 50) % 2 === 0) ctx.strokeStyle = '#ff5555';
-            else ctx.strokeStyle = strokeColor;
-            ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalAlpha = 1.0; 
+//         draw(ctx) {
+//             // 1. Vykreslení Pozadí (Hra)
+//             ctx.fillStyle = colors.bg;
+//             ctx.fillRect(0, 0, gameWidth, height);
 
-            for (let i = this.segments.length - 1; i >= 0; i--) {
-                const seg = this.segments[i];
-                const scale = Math.max(0.2, seg.y / height);
-                const segRadius = (i === 0 ? 14 : 10) * scale; 
-                ctx.lineWidth = 1.5 * scale; ctx.beginPath();
+//             // Střed tunelu (v levé části obrazovky)
+//             const cx = gameWidth / 2;
+//             const cy = height / 2;
 
-                let angle;
-                if (i > 0) angle = Math.atan2(seg.y - this.segments[i-1].y, seg.x - this.segments[i-1].x);
-                else angle = Math.atan2(this.segments[1].y - seg.y, this.segments[1].x - seg.x) + Math.PI;
+//             const project = (angle, z, radius) => {
+//                 const scale = this.fov / (this.fov + z);
+//                 const x = Math.cos(angle - this.playerAngle) * radius * scale;
+//                 const y = Math.sin(angle - this.playerAngle) * radius * scale;
+//                 return { x: cx + x, y: cy + y, scale: scale };
+//             };
 
-                const perpX = Math.cos(angle + Math.PI/2); const perpY = Math.sin(angle + Math.PI/2);
-                const wiggle = this.moving ? Math.sin(this.walkCycle + i) * 5 * scale : 0;
-                const legLen = 18 * scale;
+//             // 2. Vykreslení Tunelu
+//             ctx.lineWidth = 2;
+//             for (let i = 0; i < this.segments.length; i++) {
+//                 const seg = this.segments[i];
+//                 if (seg.z < -this.fov + 10) continue;
 
-                ctx.moveTo(seg.x + perpX * segRadius, seg.y + perpY * segRadius);
-                ctx.quadraticCurveTo(seg.x + perpX*(segRadius+5*scale), seg.y + perpY*(segRadius+5*scale) - wiggle, seg.x + perpX*(segRadius+legLen) + (Math.cos(angle)*wiggle), seg.y + perpY*(segRadius+legLen) + (Math.sin(angle)*wiggle));
-                ctx.moveTo(seg.x - perpX * segRadius, seg.y - perpY * segRadius);
-                ctx.quadraticCurveTo(seg.x - perpX*(segRadius+5*scale), seg.y - perpY*(segRadius+5*scale) + wiggle, seg.x - perpX*(segRadius+legLen) + (Math.cos(angle)*wiggle), seg.y - perpY*(segRadius+legLen) + (Math.sin(angle)*wiggle));
-                ctx.stroke();
+//                 const radius = 250;
+//                 const alpha = Math.min(1, (1 - seg.z / (this.segmentCount * this.segmentDepth)) * 1.5);
+//                 if (alpha <= 0) continue;
 
-                ctx.beginPath(); ctx.fillStyle = bgColor;
-                ctx.arc(seg.x, seg.y, segRadius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+//                 // Kruh
+//                 ctx.beginPath();
+//                 ctx.strokeStyle = `rgba(68, 68, 85, ${alpha})`; // Barva wireframe
+//                 for(let a=0; a<Math.PI*2; a+=0.3) {
+//                    const p = project(a, seg.z, radius);
+//                    if(a===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+//                 }
+//                 ctx.closePath();
+//                 ctx.stroke();
 
-                if (i === 0) {
-                    const eyeDist = 6 * scale; const eyeSize = 2 * scale;
-                    const eyeX = Math.cos(angle + Math.PI/2); const eyeY = Math.sin(angle + Math.PI/2);
-                    ctx.beginPath(); ctx.fillStyle = (this.recoilTimer > 0) ? '#ff5555' : strokeColor; 
-                    ctx.arc(seg.x + eyeX * eyeDist + Math.cos(angle)*5*scale, seg.y + eyeY * eyeDist + Math.sin(angle)*5*scale, eyeSize, 0, Math.PI*2);
-                    ctx.arc(seg.x - eyeX * eyeDist + Math.cos(angle)*5*scale, seg.y - eyeY * eyeDist + Math.sin(angle)*5*scale, eyeSize, 0, Math.PI*2);
-                    ctx.fill();
-                }
-            }
-            ctx.restore();
-        }
-    }
+//                 // Překážka / Zóna
+//                 if (seg.obstacle) {
+//                     const type = seg.obstacle.type;
+//                     let color = colors.red;
+//                     if (type === 'yellow') color = colors.yellow;
+//                     if (type === 'green') color = colors.green;
 
-    const centipede = new Centipede();
+//                     ctx.beginPath();
+//                     ctx.strokeStyle = color;
+//                     ctx.fillStyle = color; 
+                    
+//                     // U zón (žlutá/zelená) uděláme poloprůhlednou výplň
+//                     const opacity = (type === 'red') ? 0.8 : 0.3;
+//                     ctx.globalAlpha = alpha * opacity;
 
-    function drawUI() {
-        if (scoreOpacity > 0.4) scoreOpacity -= 0.02;
-        ctx.save();
-        ctx.font = '200 48px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-        if (damageFlash > 0 || score < 0) ctx.fillStyle = '#ff5555'; else ctx.fillStyle = strokeColor;
-        ctx.globalAlpha = Math.min(1, scoreOpacity + (damageFlash > 0 ? 1 : 0)); 
-        ctx.fillText(score, width - 40, 30);
-        ctx.font = '300 14px sans-serif'; ctx.globalAlpha = 0.4;
-        ctx.fillText('SCORE', width - 40, 80);
-        ctx.restore();
-        if (damageFlash > 0) { ctx.fillStyle = `rgba(255, 0, 0, ${damageFlash * 0.1})`; ctx.fillRect(0, 0, width, height); damageFlash -= 0.05; }
-    }
+//                     const step = 0.1;
+//                     // Vykreslení výseče
+//                     for (let a = seg.obstacle.start; a <= seg.obstacle.end; a += step) {
+//                         const p = project(a, seg.z, radius - 5);
+//                         if (a === seg.obstacle.start) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+//                     }
+//                     for (let a = seg.obstacle.end; a >= seg.obstacle.start; a -= step) {
+//                         const p = project(a, seg.z, radius - (type==='red'?0:40)); // Zóny jsou "hlubší"
+//                         ctx.lineTo(p.x, p.y);
+//                     }
+//                     ctx.closePath();
+//                     ctx.fill();
+//                     if(type === 'red') ctx.stroke(); // Červená má i obrys
+//                     ctx.globalAlpha = 1.0;
+//                 }
+//             }
 
-    function animate() {
-        ctx.clearRect(0, 0, width, height);
-        centipede.update();
-        centipede.draw(ctx);
-        drawUI();
-        requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
-});
+//             // Spojovací čáry (jen pro efekt rychlosti)
+//             ctx.globalAlpha = 0.1;
+//             ctx.strokeStyle = colors.uiText;
+//             for(let a = 0; a < Math.PI * 2; a += Math.PI / 2) {
+//                 const p1 = project(a, 0, 250);
+//                 const p2 = project(a, 1000, 250);
+//                 ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+//             }
+//             ctx.globalAlpha = 1.0;
+
+//             // 3. Hráč
+//             if (!this.gameOver) {
+//                 ctx.save();
+//                 ctx.translate(cx, cy + 160); 
+//                 ctx.rotate(this.rotationSpeed * 8); // Náklon
+                
+//                 // Glow efekt lodi
+//                 ctx.shadowBlur = 15;
+//                 ctx.shadowColor = (this.effectTimer > 0 && this.effectMessage.includes("BOOST")) ? colors.green : colors.ship;
+
+//                 ctx.fillStyle = colors.ship;
+//                 ctx.beginPath();
+//                 ctx.moveTo(0, -10); ctx.lineTo(-12, 15); ctx.lineTo(0, 8); ctx.lineTo(12, 15);
+//                 ctx.closePath();
+//                 ctx.fill();
+//                 ctx.restore();
+//             }
+
+//             // 4. EFEKT Text ve hře (nad lodí)
+//             if (this.effectTimer > 0) {
+//                 ctx.save();
+//                 ctx.textAlign = 'center';
+//                 ctx.font = 'bold 24px sans-serif';
+//                 ctx.fillStyle = this.effectMessage.includes("SLOW") ? colors.yellow : colors.green;
+//                 ctx.fillText(this.effectMessage, cx, cy + 80 - (60 - this.effectTimer)); // Text stoupá
+//                 ctx.restore();
+//             }
+
+//             // 5. UI PANEL (Pravá strana)
+//             this.drawUI(ctx);
+//         }
+
+//         drawUI(ctx) {
+//             // Pozadí panelu
+//             ctx.fillStyle = colors.uiBg;
+//             ctx.fillRect(gameWidth, 0, sidebarWidth, height);
+            
+//             // Oddělovací čára
+//             ctx.beginPath();
+//             ctx.moveTo(gameWidth, 0);
+//             ctx.lineTo(gameWidth, height);
+//             ctx.strokeStyle = '#333';
+//             ctx.lineWidth = 2;
+//             ctx.stroke();
+
+//             const centerX = gameWidth + (sidebarWidth / 2);
+//             const padding = 30;
+
+//             ctx.fillStyle = colors.uiText;
+//             ctx.textAlign = 'center';
+
+//             // -- HEADER --
+//             ctx.font = '700 32px sans-serif';
+//             ctx.fillText("NEON TUBE", centerX, 60);
+            
+//             ctx.font = '14px sans-serif';
+//             ctx.fillStyle = '#888';
+//             ctx.fillText("High Velocity Runner", centerX, 85);
+
+//             // -- SCORE BOARD --
+//             let y = 150;
+            
+//             // Skóre
+//             ctx.fillStyle = colors.uiText;
+//             ctx.font = '16px sans-serif';
+//             ctx.fillText("SCORE", centerX, y);
+//             ctx.font = '200 48px sans-serif'; // Tenký velký font
+//             ctx.fillText(this.score, centerX, y + 50);
+
+//             // Vzdálenost
+//             y += 100;
+//             ctx.fillStyle = '#aaa';
+//             ctx.font = '14px sans-serif';
+//             ctx.fillText("DISTANCE", centerX, y);
+//             ctx.fillStyle = colors.uiText;
+//             ctx.font = '24px sans-serif';
+//             ctx.fillText(Math.floor(this.distance / 100) + " km", centerX, y + 30);
+
+//             // Rychlost (Speedometer)
+//             y += 80;
+//             ctx.fillStyle = '#aaa';
+//             ctx.font = '14px sans-serif';
+//             ctx.fillText("SPEED", centerX, y);
+            
+//             // Grafický bar rychlosti
+//             const barWidth = sidebarWidth - 60;
+//             const barHeight = 6;
+//             ctx.fillStyle = '#333';
+//             ctx.fillRect(centerX - barWidth/2, y + 15, barWidth, barHeight);
+            
+//             const speedPercent = Math.min((this.speed / 40), 1); // Max speed cca 40
+//             let barColor = colors.uiText;
+//             if (this.speed > 25) barColor = colors.green;
+//             if (this.speed < 5) barColor = colors.yellow;
+            
+//             ctx.fillStyle = barColor;
+//             ctx.fillRect(centerX - barWidth/2, y + 15, barWidth * speedPercent, barHeight);
+            
+//             // -- LEGENDA --
+//             y += 80;
+//             ctx.font = '12px sans-serif';
+//             ctx.fillStyle = '#666';
+//             ctx.fillText("OBSTACLES", centerX, y);
+            
+//             const legendItem = (color, text, ly) => {
+//                 ctx.fillStyle = color;
+//                 ctx.fillRect(centerX - 60, ly - 10, 10, 10);
+//                 ctx.fillStyle = '#aaa';
+//                 ctx.textAlign = 'left';
+//                 ctx.fillText(text, centerX - 40, ly);
+//                 ctx.textAlign = 'center';
+//             };
+            
+//             legendItem(colors.red, "CRASH (Game Over)", y + 30);
+//             legendItem(colors.yellow, "SLUDGE (Slow)", y + 55);
+//             legendItem(colors.green, "BOOST (Speed)", y + 80);
+
+//             // -- STATUS / GAME OVER --
+//             y = height - 100;
+//             if (this.gameOver) {
+//                 ctx.fillStyle = colors.red;
+//                 ctx.font = 'bold 36px sans-serif';
+//                 ctx.fillText("CRASHED", centerX, y);
+                
+//                 // Blikající text
+//                 if (Math.floor(Date.now() / 500) % 2 === 0) {
+//                     ctx.fillStyle = colors.uiText;
+//                     ctx.font = '16px sans-serif';
+//                     ctx.fillText("PRESS [SPACE] TO RESTART", centerX, y + 40);
+//                 }
+//             } else {
+//                 ctx.fillStyle = '#444';
+//                 ctx.font = '14px sans-serif';
+//                 ctx.fillText("Use Arrows or A/D to rotate", centerX, y + 40);
+//             }
+//         }
+//     }
+
+//     // Spuštění
+//     const game = new TunnelGame();
+//     function loop() {
+//         ctx.clearRect(0,0,width,height);
+//         game.update();
+//         game.draw(ctx);
+//         requestAnimationFrame(loop);
+//     }
+//     loop();
+// });
